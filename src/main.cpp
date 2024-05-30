@@ -31,17 +31,18 @@ void loop() {
             Serial.println("Connected!");
         }
         Serial.println("Connected!");
-        float left_pwm = 0.0;                   // 0..1
-        float right_pwm = 0.0;                  // 0..1
+        float left_pwm = 1.0;                   // 0..1
+        float right_pwm = 1.0;                  // 0..1
         float speed_normalized = 0.0;           // -1.00 ..  1.00
         if (ps5.LStickX() < -STICK_DEADZONE) {  // x-Left from -30 to -1
-            Serial.printf("LStickX: %d\n", ps5.LStickX());
+            // Serial.printf("LStickX: %d\n", ps5.LStickX());
+            left_pwm = float(map(ps5.LStickX(), -140, 0, 0, 100)) / 100.0;
+            Serial.printf("left_pwm: %.2f\n", left_pwm);
         }
         if (STICK_DEADZONE < ps5.LStickX()) {  // x-right from 30 to 1
-            Serial.printf("LStickX: %d\n", ps5.LStickX());
-        }
-        if (ps5.L2()) {
-            Serial.printf("L2 button at %d\n", ps5.L2Value());
+            // Serial.printf("LStickX: %d\n", ps5.LStickX());
+            right_pwm = float(map(ps5.LStickX(), 0, 130, 100, 0)) / 100.0;
+            Serial.printf("right_pwm: %.2f\n", right_pwm);
         }
         if (ps5.R2() || ps5.L2()) {  // 0..255 Acelerar
             float accelerate_normalized =
@@ -49,9 +50,11 @@ void loop() {
             float retro_normalized =
                 float(map(ps5.L2Value(), 0, 255, 0, 100)) / 100.0;
             speed_normalized = accelerate_normalized - retro_normalized;
-            Serial.printf("speed_normalized: %.2f\n", speed_normalized);
-            Serial.printf("R2 button at %d\n", ps5.R2Value());
-            motors.drive(speed_normalized, speed_normalized, 30);
+            // Serial.printf("speed_normalized: %.2f\n", speed_normalized);
+            // Serial.printf("R2 button at %d\n", ps5.R2Value());
+            motors.drive(left_pwm * speed_normalized, right_pwm * speed_normalized, 30);
+            Serial.printf("left_pwm: %.2f\n", left_pwm * speed_normalized);
+            Serial.printf("right_pwm: %.2f\n", right_pwm * speed_normalized);
         }
         delay(10);
     }
